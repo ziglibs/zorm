@@ -1,5 +1,7 @@
 const std = @import("std");
 const crypto = std.crypto;
+const testing = std.testing;
+const mem = std.mem;
 
 const UUID = @This();
 
@@ -46,4 +48,14 @@ pub fn toString(self: *UUID) []const u8 {
     }
 
     return @as([]const u8, &buffer);
+}
+
+test "Create UUID" {
+    const uuid = UUID.init();
+    try testing.expect(&uuid.octets != undefined);
+}
+
+test "Check UUID string" {
+    var uuid = UUID.init();
+    try testing.expect(uuid.toString().len == 36);
 }
