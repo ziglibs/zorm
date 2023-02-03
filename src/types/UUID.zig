@@ -32,7 +32,7 @@ pub fn init() UUID {
     return uuid;
 }
 
-/// Allocs the UUID and sets undefined space to the UUID (removing it)
+/// Removes all memory space within the UUID.
 pub fn deinit(self: *UUID) void {
     self = undefined;
 }
