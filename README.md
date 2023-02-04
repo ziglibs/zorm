@@ -12,7 +12,6 @@ In zorm, objects are cast on manually defined fields that can be compared:
 
 ```zig
 const std = @import("std");
-const json = std.json;
 
 // In this example, we'll be mapping our object from JSON.
 // For this very specific use case, zorm will handle assuming types to be tight and memory-bound.
