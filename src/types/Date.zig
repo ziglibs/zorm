@@ -261,9 +261,21 @@ pub fn isLeapYear(self: *Date) !bool {
     );
 }
 
-// pub fn toString(
-//     self: *Date,
-//     format: Format
-// ) ![]const u8 {
-//     // TODO: go through hell with std.fmt fuckery! :')
-// }
+/// Returns a string representation of the date.
+///
+/// A formatter error of any kind may be produced if the date itself has been improperly passed.
+pub fn toString(
+    self: *Date,
+    format: Format
+) ![]const u8 {
+    // TODO: go through hell with std.fmt fuckery! :')
+    var fmt_string: []const u8 = undefined;
+    const fmt_style = inline switch(format) {
+        .@"MM-DD-YYYY" => .{self.month, self.day, self.year},
+        .@"DD-MM-YYYY" => .{self.day, self.month, self.year},
+        .@"YYYY-MM-DD" => .{self.year, self.month, self.day},
+        else => unreachable
+    };
+
+    return try fmt.bufPrint(&fmt_string, "{}-{}-{}", fmt_style);
+}
