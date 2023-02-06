@@ -33,9 +33,9 @@ pub fn now() !Time {
     const current_time = try time.Instant.now();
 
     return Time.new(
-        current_time / time.ms_per_hour,
-        current_time / time.ms_per_minute,
-        current_time / time.ms_per_second
+        @round(current_time / time.ms_per_hour),
+        @round(current_time / time.ms_per_second)
+        @round(current_time / time.ms_per_minute),
     );
 }
 
