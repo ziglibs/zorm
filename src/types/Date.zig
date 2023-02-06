@@ -5,6 +5,15 @@ const mem = std.mem;
 pub const Date = @This();
 
 const Error = error { Missing };
+const Weekday = enum {
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday
+};
 
 year: ?i64 = undefined,
 month: ?u8 = undefined,
@@ -65,6 +74,51 @@ pub fn from(self: *Date, date: ?Date) !?Date {
         self.year - date.year,
         self.month - date.month,
         self.day - date.day
+    );
+}
+
+pub fn weekday(self: *Date) !Weekday {
+    try self.validate();
+
+    var current_year = self.year;
+    var current_month = self.month;
+    const current_century = current_year / 100;
+
+    current_month -= 2;
+    if (current_month < 1) |month| {
+        month += 12;
+        --current_year;
+    }
+    current_year %= 100;
+
+    const day_of_week = (
+        (26 * current_month - 2) / 10 + (
+            (self.day + current_year) +
+            (current_year / 4) +
+            (current_century / 4) +
+            (5 * current_century)
+        ) % 7
+    );
+
+    return switch(day_of_week) {
+        0 => Weekday.Sunday,
+        1 => Weekday.Monday,
+        2 => Weekday.Tuesday,
+        3 => Weekday.Wednesday,
+        4 => Weekday.Thursday,
+        5 => Weekday.Friday,
+        6 => Weekday.Saturday,
+        else => unreachable
+    };
+}
+
+pub fn isLeapYear(self: *Date) !bool {
+    if (self.year == undefined) return Error.Missing;
+    else return (
+        self.year % 4 == 0 and (
+            year % 100 != 0
+            or year % 400 == 0
+        )
     );
 }
 
