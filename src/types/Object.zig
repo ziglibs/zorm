@@ -23,7 +23,7 @@ pub fn Object(
         const Model = @This();
 
         /// UUID of the model. Implicitly created for you, with the option to provide your own.
-        id = UUID.init(),
+        id: UUID = UUID.init(),
 
         /// The fields of the model. To access their contents, you will need to iterate
         /// through each field. Type information will always be present.
@@ -32,6 +32,18 @@ pub fn Object(
         /// Removes all memory space within the UUID.
         pub fn deinit(self: Model) void {
             self.* = undefined;
+        }
+
+        /// Gets data on a field from the object.
+        pub fn get(
+            self: *Model,
+            /// The field to get.
+            field_name: []const u8
+        ) ?Field {
+            for (self.fields) |field| {
+                if (field.name == field_name)
+                    return field_name;
+            }
         }
     };
 }

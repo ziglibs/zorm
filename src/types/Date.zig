@@ -37,7 +37,7 @@ const Weekday = union(enum) {
 
     /// Returns a weekday based off of an integer between 0 and 6.
     pub fn from(v: u8) Weekday {
-        return switch(@day_of_week) {
+        return switch(v) {
             0 => Weekday.Sunday,
             1 => Weekday.Monday,
             2 => Weekday.Tuesday,
@@ -253,10 +253,10 @@ pub fn weekday(self: *Date) !Weekday {
 // A `Missing` error may be returned in the event that the year is missing from the date.
 pub fn isLeapYear(self: *Date) !bool {
     if (self.year == undefined) return Error.Missing;
-    else return (
+    return (
         self.year % 4 == 0 and (
-            year % 100 != 0
-            or year % 400 == 0
+            self.year % 100 != 0
+            or self.year % 400 == 0
         )
     );
 }
@@ -268,7 +268,7 @@ pub fn toString(
     self: *Date,
     format: Format
 ) ![]const u8 {
-    const fmt_style = inline switch(format) {
+    const fmt_style = switch(format) {
         .@"MM-DD-YYYY" => .{self.month, self.day, self.year},
         .@"DD-MM-YYYY" => .{self.day, self.month, self.year},
         .@"YYYY-MM-DD" => .{self.year, self.month, self.day},

@@ -6,7 +6,7 @@ const FieldMetadata = struct {
     desc: ?[]const u8,
 
     /// What the potential default value may be.
-    default: ?anytype
+    default: ?type
 };
 
 /// A field to go within an object.
