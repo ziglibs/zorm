@@ -42,7 +42,7 @@ pub fn Object(
         ) ?Field {
             for (self.fields) |field| {
                 if (field.name == field_name)
-                    return field_name;
+                    return field;
             }
         }
     };
