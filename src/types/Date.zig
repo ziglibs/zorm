@@ -37,7 +37,7 @@ const Weekday = union(enum) {
 
     /// Returns a weekday based off of an integer between 0 and 6.
     pub fn from(v: u8) Weekday {
-        return switch(@trunc(day_of_week)) {
+        return switch(@day_of_week) {
             0 => Weekday.Sunday,
             1 => Weekday.Monday,
             2 => Weekday.Tuesday,
@@ -245,7 +245,7 @@ pub fn weekday(self: *Date) !Weekday {
     // Truncating it closer to zero and moving it from a *potential* float (even though it
     // shouldn't be!) to an integer. Then we take it, and from our indices of an enum literal,
     // we give it an enumerable return.
-    return Weekday.from(day_of_week);
+    return Weekday.from(@trunc(day_of_week));
 }
 
 // Returns a binary state whether the current date is on a leap year or not.
