@@ -1,6 +1,7 @@
 const std = @import("std");
 const time = std.time;
 const fmt = std.fmt;
+const mem = std.mem;
 
 /// A date based off of the Proleptic Gregorian calendar.
 ///
@@ -279,4 +280,35 @@ pub fn toString(
     fmt_string = try fmt.bufPrint(&fmt_string, "{}-{}-{}", fmt_style);
 
     return @as([]const u8, fmt_string);
+}
+
+/// Returns a date from a string.
+pub fn fromString(
+    /// The current string format of the date.
+    date: []const u8,
+    /// The format of the date.
+    ///
+    /// This is necessary to help figure out how to properly extract the year, month
+    /// and day of the date.
+    format: Format
+) Date {
+    const values = mem.split(u8, date, "-");
+
+    const gpa = heap.GeneralPurposeAllocator(.{}){};
+    var num_array = std.ArrayList(u8).init(gpa.allocator());
+
+    defer {
+        const leak = gpa.deinit();
+        num_array.deinit();
+
+        if (leak) expect(false) catch @panic("Allocator exhausted buffer!");
+    }
+
+    while (values.next()) |value| {
+        num_array.append(value);
+    }
+
+    if (format.@"MM-DD-YYYY") return Date.init(nums[2], nums[1], @as(i64, nums[0]));
+    if (format.@"DD-MM-YYYY") return Date.init(nums[1], nums[2], @as(i64, nums[0]));
+    if (format.@"YYYY-MM-DD") return Date.init(@as(i64, nums[0]), nums[2], nums[1]);
 }
