@@ -26,7 +26,7 @@ const Error = error {
 ///
 /// Weekdays are linearly assigned an enum literal value, from 0 to 6 representing
 /// all 7 possible days of a week on a Gregorian calendar.
-const Weekday = enum {
+const Weekday = union(enum) {
     Sunday,
     Monday,
     Tuesday,
@@ -34,6 +34,23 @@ const Weekday = enum {
     Thursday,
     Friday,
     Saturday,
+
+    /// Returns a weekday based off of an integer between 0 and 6.
+    pub fn from(v: u8) Weekday {
+        return switch(@trunc(day_of_week)) {
+            0 => Weekday.Sunday,
+            1 => Weekday.Monday,
+            2 => Weekday.Tuesday,
+            3 => Weekday.Wednesday,
+            4 => Weekday.Thursday,
+            5 => Weekday.Friday,
+            6 => Weekday.Saturday,
+
+            // We should never be able to get another value outside of 0-6,
+            // so it's "unreachable."
+            else => unreachable
+        };
+    }
 };
 
 /// All possible ways to format a date.
@@ -228,18 +245,7 @@ pub fn weekday(self: *Date) !Weekday {
     // Truncating it closer to zero and moving it from a *potential* float (even though it
     // shouldn't be!) to an integer. Then we take it, and from our indices of an enum literal,
     // we give it an enumerable return.
-    return switch(@trunc(day_of_week)) {
-        0 => Weekday.Sunday,
-        1 => Weekday.Monday,
-        2 => Weekday.Tuesday,
-        3 => Weekday.Wednesday,
-        4 => Weekday.Thursday,
-        5 => Weekday.Friday,
-        6 => Weekday.Saturday,
-
-        // We should never be able to get another value outside of 0-6, so it's "unreachable."
-        else => unreachable
-    };
+    return Weekday.from(day_of_week);
 }
 
 // Returns a binary state whether the current date is on a leap year or not.
