@@ -10,6 +10,8 @@ paradigms.
 
 In zorm, objects are cast on manually defined fields that can be compared:
 
+### Object mapping
+
 ```zig
 const std = @import("std");
 
@@ -41,6 +43,36 @@ pub fn main() !void {
     // Accessing data is now done through the newly created object.
     std.debug.print("{?}\n", .{myFoo.get("foo")});
 }
+```
+
+### Using datatypes
+
+zorm provides you a set of datatypes. An example of a datatype is `Date`:
+
+```zig
+pub fn main() !void {
+    const date = try zorm.Date.fromString("2002-07-23", .@"YYYY-MM-DD");
+
+    const payload =
+        \\{
+        \\    "date": "1999-12-31"
+        \\}
+    ;
+    const NewTable = try zorm.create(
+        zorm.Object(.{
+            zorm.Field(?zorm.Date, .{ .name = "date", .default = date })
+        }),
+        payload
+    );
+
+    std.debug.print("{?}\n", .{NewTable.get("date").data.year});
+}
+```
+
+```bash
+$ zig build run
+
+1999
 ```
 
 ## Building
