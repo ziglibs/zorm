@@ -1,6 +1,7 @@
 const std = @import("std");
 const time = std.time;
 const fmt = std.fmt;
+const heap = std.heap;
 const mem = std.mem;
 
 /// A date based off of the Proleptic Gregorian calendar.
@@ -55,7 +56,7 @@ const Weekday = union(enum) {
 };
 
 /// All possible ways to format a date.
-const Format = enum {
+pub const Format = enum {
     @"MM-DD-YYYY",
     @"DD-MM-YYYY",
 
@@ -66,13 +67,13 @@ const Format = enum {
 /// The current century, using zero-based centuries precision.
 /// Centuries are purely Gregorian based and are not algorithmically produced from a Julian
 /// calendar.
-century: ?u8 = undefined,
+century: ?u64 = undefined,
 
 /// The current year. A year constant should presumably be within 0000.
 ///
 /// Years before 1969 or after 2038 will immediately invalidate expression returns within
 /// methods requiring POSIX/UNIX validation from their Epoch.
-year: ?i64 = undefined,
+year: ?u64 = undefined,
 
 /// The current month.
 month: ?u8 = undefined,
@@ -93,17 +94,17 @@ day: ?u8 = undefined,
 /// generated for you as floored constants dependent on the arguments inputted.
 pub fn init(
     /// The year of the date.
-    year: i64,
+    year: u64,
     /// The month of the date.
     month: u8,
     /// The day of the date.
     day: u8
 ) Date {
     return Date {
-        .century = @floor(year / 100) + 1,
+        .century = (year / 100) + 1,
         .year = year,
         .month = month,
-        .week = @floor(day / 7),
+        .week = day / 7,
         .day = day
     };
 }
@@ -205,7 +206,7 @@ pub fn weekday(self: *Date) !Weekday {
 
     // Unlike in `Date.init()`, we're using a zero-based century as
     // described in Zeller's congruence.
-    const current_century = @floor(current_year / 100);
+    const current_century = @divFloor(current_year, 100);
 
     // We're doing month shifting. Why? Because we're trying to factor in for February.
     // February is the oddball as it can be affected by the current year and if it's a leap year.
@@ -291,24 +292,37 @@ pub fn fromString(
     /// This is necessary to help figure out how to properly extract the year, month
     /// and day of the date.
     format: Format
-) Date {
-    const values = mem.split(u8, date, "-");
-
-    const gpa = heap.GeneralPurposeAllocator(.{}){};
-    var num_array = std.ArrayList(u8).init(gpa.allocator());
+) !Date {
+    var values = mem.split(u8, date, "-");
+    var gpa = heap.GeneralPurposeAllocator(.{}){};
+    var num_array = std.ArrayList([]const u8).init(gpa.allocator());
 
     defer {
         const leak = gpa.deinit();
         num_array.deinit();
 
-        if (leak) expect(false) catch @panic("Allocator exhausted buffer!");
+        if (leak) @panic("Allocator exhausted memory buffer!");
     }
 
     while (values.next()) |value| {
-        num_array.append(value);
+        try num_array.append(value);
     }
 
-    if (format.@"MM-DD-YYYY") return Date.init(nums[2], nums[1], @as(i64, nums[0]));
-    if (format.@"DD-MM-YYYY") return Date.init(nums[1], nums[2], @as(i64, nums[0]));
-    if (format.@"YYYY-MM-DD") return Date.init(@as(i64, nums[0]), nums[2], nums[1]);
+    return switch(format) {
+        .@"MM-DD-YYYY" => Date.init(
+            try fmt.parseInt(u64, num_array.items[2], 0),
+            try fmt.parseInt(u8, num_array.items[1], 0),
+            try fmt.parseInt(u8, num_array.items[0], 0)
+        ),
+        .@"DD-MM-YYYY" => Date.init(
+            try fmt.parseInt(u64, num_array.items[1], 0),
+            try fmt.parseInt(u8, num_array.items[2], 0),
+            try fmt.parseInt(u8, num_array.items[0], 0)
+        ),
+        .@"YYYY-MM-DD" => Date.init(
+            try fmt.parseInt(u64, num_array.items[0], 0),
+            try fmt.parseInt(u8, num_array.items[2], 0),
+            try fmt.parseInt(u8, num_array.items[1], 0),
+        )
+    };
 }
