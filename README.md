@@ -51,8 +51,10 @@ zorm provides you a set of datatypes. An example of a datatype is `Date`:
 
 ```zig
 pub fn main() !void {
+    // We can build a date from a string, useful for defaults.
     const date = try zorm.Date.fromString("2002-07-23", .@"YYYY-MM-DD");
 
+    // This is an ISO 8601 format, which zorm will intelligently determine
     const payload =
         \\{
         \\    "date": "1999-12-31"
@@ -60,19 +62,16 @@ pub fn main() !void {
     ;
     const NewTable = try zorm.create(
         zorm.Object(.{
+            // Default values must either be undefined or part of the type specified in the field,
+            // as expected when working with structs.
             zorm.Field(?zorm.Date, .{ .name = "date", .default = date })
         }),
         payload
     );
 
+    // 1999 will be returned instead of 2002.
     std.debug.print("{?}\n", .{NewTable.get("date").data.year});
 }
-```
-
-```bash
-$ zig build run
-
-1999
 ```
 
 ## Building
