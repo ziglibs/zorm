@@ -10,5 +10,5 @@ pub fn main() !void {
 
     // testing date code
     const date = try Date.fromString("2023-07-23", .@"YYYY-MM-DD");
-    _ = date;
+    std.debug.print("{?}", .{date.year});
 }

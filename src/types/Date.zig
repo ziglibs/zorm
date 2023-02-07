@@ -297,9 +297,11 @@ pub fn fromString(
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     var num_array = std.ArrayList([]const u8).init(gpa.allocator());
 
+    _ = format;
+
     defer {
-        const leak = gpa.deinit();
         num_array.deinit();
+        const leak = gpa.deinit();
 
         if (leak) @panic("Allocator exhausted memory buffer!");
     }
