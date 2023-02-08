@@ -1,4 +1,0 @@
-sqlite3.c linguist-vendored
-sqlite3.h linguist-vendored
-zig.mod linguist-vendored
-*.zig text=auto eol=lf
