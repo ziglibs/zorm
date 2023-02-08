@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  create:
+  push:
+    branches: master
+  pull_request:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: master
+      - run: zig fmt --check *.zig
+
+  test-in-memory:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04, macos-latest, macos-12]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: master
+
+      - uses: actions/cache@v3
+        if: ${{ matrix.os != 'windows-latest' }}
+        with:
+          path: |
+            zig-cache
+            ~/.cache/zig
+          key: ${{ runner.os }}-${{ matrix.os }}-zig-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ matrix.os }}-zig-
+
+      - name: Run Tests in memory
+        run: zig build test -Din_memory=true
+
+      - name: Build the example zigcrypto loadable extension
+        run: zig build zigcrypto
+      - name: Test the zigcrypto loadable extension
+        run: ./zig-out/bin/zigcrypto-test
