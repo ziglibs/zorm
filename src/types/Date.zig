@@ -114,7 +114,7 @@ fn validate(
     self: *Date,
     /// The date to validate against.
     date: ?Date
-) !bool {
+) Error!bool {
     // A date can still be created by struct alone - we have to run some checks.
     if (self.year == undefined or date.year.? == undefined) return Error.Missing;
     if (self.month == undefined or date.month.? == undefined) return Error.Missing;
@@ -154,7 +154,7 @@ pub fn now() !Date {
 /// A `Missing` or `OutOfRange` error may be returned in the event that part of the date
 /// is either found to be missing, or the years specified are out of bounds. (before 1969 or
 /// after 2038)
-pub fn from(self: *Date, date: ?Date) !?Date {
+pub fn from(self: *Date, date: ?Date) Error!?Date {
     // We're checking to see if both dates are the same.
     // This is necessary and cannot be simplified through checking their bare values,
     // as we use undefined to temporarily store a value to the struct identifiers.
@@ -191,7 +191,7 @@ pub fn from(self: *Date, date: ?Date) !?Date {
 ///
 /// A `Missing` error may be returned in the event that part of a date is found to be
 /// missing.
-pub fn weekday(self: *Date) !Weekday {
+pub fn weekday(self: *Date) Error!Weekday {
     // This implementation is based off of RFC 3339, Appendix B.
     // https://www.rfc-editor.org/rfc/rfc3339#appendix-B
     //
@@ -253,7 +253,7 @@ pub fn weekday(self: *Date) !Weekday {
 // Returns a binary state whether the current date is on a leap year or not.
 //
 // A `Missing` error may be returned in the event that the year is missing from the date.
-pub fn isLeapYear(self: *Date) !bool {
+pub fn isLeapYear(self: *Date) Error!bool {
     if (self.year == undefined) return Error.Missing;
     return (
         self.year % 4 == 0 and (
