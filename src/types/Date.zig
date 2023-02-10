@@ -322,7 +322,7 @@ pub fn fromString(
         .@"YYYY-MM-DD" => Date.init(
             try fmt.parseInt(u64, num_array.items[0], 0),
             try fmt.parseInt(u8, num_array.items[2], 0),
-            try fmt.parseInt(u8, num_array.items[1], 0),
+            try fmt.parseInt(u8, num_array.items[1], 0)
         )
     };
 }

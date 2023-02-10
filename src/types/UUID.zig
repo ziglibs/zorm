@@ -63,7 +63,7 @@ pub fn toString(self: *UUID) []const u8 {
 }
 
 test "Create UUID" {
-    const uuid = UUID.init();
+    var uuid = UUID.init();
     try testing.expect(&uuid.octets != undefined);
 
     log.debug("{s}", .{uuid.toString()});

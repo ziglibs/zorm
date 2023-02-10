@@ -45,5 +45,5 @@ pub fn Object(
                     return field;
             }
         }
-    };
+    }{};
 }
