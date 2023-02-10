@@ -38,10 +38,10 @@ const Foo = zorm.Object(.{
 pub fn main() !void {
     // With an object defined, we can now generate our own from our payload.
     // (comptime T: type, data: anytype)
-    const myFoo: zorm.Object = try zorm.create(Foo, dumb_payload);
+    const myFoo: zorm.Object = try zorm.create(Foo, .{ .JsonString = dumb_payload });
 
     // Accessing data is now done through the newly created object.
-    std.debug.print("{?}\n", .{myFoo.get("foo")});
+    std.debug.print("{any}\n", .{myFoo.get("foo")});
 }
 ```
 
@@ -66,11 +66,11 @@ pub fn main() !void {
             // as expected when working with structs.
             zorm.Field(?zorm.Date, .{ .name = "date", .default = date })
         }),
-        payload
+        .{ .JsonString = payload }
     );
 
     // 1999 will be returned instead of 2002.
-    std.debug.print("{?}\n", .{NewTable.get("date").data.year});
+    std.debug.print("{?}\n", .{NewTable.get("date").f_type.year});
 }
 ```
 
