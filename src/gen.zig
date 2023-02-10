@@ -1,14 +1,16 @@
 const std = @import("std");
+const json = std.json;
+
 const Object = @import("./types/Object.zig");
 
 /// Acceptable types of payloads for creation and deletion.
 const Payload = union {
     /// JSON formatted multiline strings.
     /// Refer to the \\ trailing syntax for more information, and `std.json`.
-    json: []const u8,
+    JsonString: []const u8,
 
-    /// A structure that has *already* been initialised.
-    structure: type
+    /// An anonymous struct literal that has *already* been initialised.
+    Struct: type
 };
 
 /// Creates an object based off of a supplied payload.
@@ -18,8 +20,14 @@ const Payload = union {
 ///
 /// An `Abnormal` error may be returned in the event that serialisation fails.
 pub fn create(object: Object, comptime payload: Payload) error {Abnormal}!Object {
-    _ = object;
-
-    if (@TypeOf(payload) == []const u8)
-        return error.Abnormal;
+    switch (payload) {
+        .JsonString => {
+            const parsed = try json.parse(object, .init(payload), .{
+                .duplicate_field_behavior = .Error,
+                .allow_trailing_data = true
+            });
+            return parsed;
+        },
+        .Struct => return Object(payload);
+    }
 }
