@@ -4,6 +4,10 @@
 
 ## Abstract
 
+Warning
+|-
+This library is still in development. Please use at your own expense.
+
 zorm is not your traditional ORM tool. Unlike other ORMs, zorm is designed to provide types for
 making object-relational mapping within your scripts simple and not reliant on database table
 paradigms.
