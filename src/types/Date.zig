@@ -164,7 +164,7 @@ pub fn weekday(self: *Date) !Weekday {
 
     _ = try self.validate(self.*);
 
-    var current_year = self.year.?;
+    var current_year: i64 = self.year.?;
     var current_month = self.month.?;
 
     // Unlike in `Date.init()`, we're using a zero-based century as
@@ -177,7 +177,6 @@ pub fn weekday(self: *Date) !Weekday {
     // We have to also shift the month because we're determining the week cycle.
     // This is done by also setting it up in advance to handle getting the specific day of the
     // week based off of a potential leap year and the century it coincides with.
-    current_year = @as(i64, current_year);
 
     current_month -= 2;
     if (current_month < 1) {
