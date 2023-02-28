@@ -1,4 +1,4 @@
-const UUID = @import("UUID.zig");
+const UUID = @import("UUID.zig").UUID;
 const Field = @import("Field.zig").Field;
 
 /// An item container for fields of an "object."

@@ -19,7 +19,6 @@ const FieldMetadata = struct {
 /// Anonymous struct literals are concatenated within the object when providing the final Modal
 /// type. Because of this, we have to resort to defining things such as the type we want, and
 /// additional metadata unique to the field.
-///
 pub fn Field(comptime T: type, comptime data: ?FieldMetadata) type {
     return struct {
         /// The field type. Use @TypeOf() builtin for the child type of the field.

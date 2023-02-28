@@ -1,15 +1,11 @@
 const std = @import("std");
 const json = std.json;
 
-const Object = @import("./types/Object.zig");
+const Object = @import("./types/Object.zig").Object;
 
 /// Acceptable types of payloads for creation and deletion.
 const Payload = union {
-    /// JSON formatted multiline strings.
-    /// Refer to the \\ trailing syntax for more information, and `std.json`.
     JsonString: []const u8,
-
-    /// An anonymous struct literal that has *already* been initialised.
     Struct: type,
 };
 
