@@ -18,10 +18,7 @@ const log = std.log.scoped(.date);
 pub const Date = @This();
 
 // All possible errors for a date.
-const Error = error {
-    /// Part of the date is missing, such as the year, month or day.
-    Missing
-};
+const Error = error{Missing};
 
 /// All possible days of a week, used with `Date.weekday()`.
 ///
@@ -38,7 +35,7 @@ const Weekday = union(enum) {
 
     /// Returns a weekday based off of an integer between 0 and 6.
     pub fn from(v: u8) Weekday {
-        return switch(v) {
+        return switch (v) {
             0 => Weekday.Sunday,
             1 => Weekday.Monday,
             2 => Weekday.Tuesday,
@@ -49,7 +46,7 @@ const Weekday = union(enum) {
 
             // We should never be able to get another value outside of 0-6,
             // so it's "unreachable."
-            else => unreachable
+            else => unreachable,
         };
     }
 };
@@ -60,7 +57,7 @@ pub const Format = enum {
     @"DD-MM-YYYY",
 
     /// This is an ISO 8601 representable format.
-    @"YYYY-MM-DD"
+    @"YYYY-MM-DD",
 };
 
 /// The current century, using zero-based centuries precision.
@@ -91,21 +88,8 @@ day: ?u64 = undefined,
 /// When creating a date, you are only expected to pass the year, month and day.
 /// Other identifiers of a date, such as the century and week are automatically
 /// generated for you as floored constants dependent on the arguments inputted.
-pub fn init(
-    /// The year of the date.
-    year: u64,
-    /// The month of the date.
-    month: u64,
-    /// The day of the date.
-    day: u64
-) Date {
-    return Date {
-        .century = (year / 100) + 1,
-        .year = year,
-        .month = month,
-        .week = day / 7,
-        .day = day
-    };
+pub fn init(year: u64, month: u64, day: u64) Date {
+    return Date{ .century = (year / 100) + 1, .year = year, .month = month, .week = day / 7, .day = day };
 }
 
 /// Validates and handles potential errors for a date or comparison of dates.
@@ -135,11 +119,7 @@ pub fn now() !Date {
     const ms_per_month: u64 = 30 * time.ms_per_day;
     const ms_per_year: u64 = 12 * ms_per_month;
 
-    return Date.init(
-        current_time.timestamp / ms_per_year,
-        current_time.timestamp / ms_per_month,
-        current_time.timestamp / time.ms_per_day
-    );
+    return Date.init(current_time.timestamp / ms_per_year, current_time.timestamp / ms_per_month, current_time.timestamp / time.ms_per_day);
 }
 
 /// Returns a date based off of the current stored date and one supplied.
@@ -156,11 +136,9 @@ pub fn from(self: *Date, date: ?Date) !?Date {
     //
     // We want to let developers create a date either through the struct entry, or through
     // a method.
-    if (
-        self.year.? == date.?.year and
+    if (self.year.? == date.?.year and
         self.month.? == date.?.month and
-        self.day.? == date.?.day
-    )
+        self.day.? == date.?.day)
         return null;
 
     _ = try self.validate(self.*);
@@ -168,18 +146,8 @@ pub fn from(self: *Date, date: ?Date) !?Date {
     if (@TypeOf(date.?) == Date) {
         const current_date = try Date.now();
 
-        return Date.init(
-            self.year.? - current_date.year.?,
-            self.month.? - current_date.month.?,
-            self.day.? - current_date.day.?
-        );
-    }
-
-    else return Date.init(
-        self.year.? - date.year.?,
-        self.month.? - date.month.?,
-        self.day.? - date.day.?
-    );
+        return Date.init(self.year.? - current_date.year.?, self.month.? - current_date.month.?, self.day.? - current_date.day.?);
+    } else return Date.init(self.year.? - date.year.?, self.month.? - date.month.?, self.day.? - date.day.?);
 }
 
 /// Returns the weekday of the date.
@@ -232,14 +200,10 @@ pub fn weekday(self: *Date) !Weekday {
     //
     // If you didn't understand any of that, then that's fine. I didn't either when I was reading
     // up on this. It just works. Please don't ask why.
-    const day_of_week = (
-        (26 * current_month - 2) / 10 + (
-            (self.day + current_year) +
-            (current_year / 4) +
-            (current_century / 4) +
-            (5 * current_century)
-        ) % 7
-    );
+    const day_of_week = ((26 * current_month - 2) / 10 + ((self.day + current_year) +
+        (current_year / 4) +
+        (current_century / 4) +
+        (5 * current_century)) % 7);
 
     // Truncating it closer to zero and moving it from a *potential* float (even though it
     // shouldn't be!) to an integer. Then we take it, and from our indices of an enum literal,
@@ -253,25 +217,17 @@ pub fn weekday(self: *Date) !Weekday {
 pub fn isLeapYear(self: *Date) !bool {
     if (self.year.? == undefined) return Error.Missing;
 
-    return (
-        self.year.? % 4 == 0 and (
-            self.year.? % 100 != 0
-            or self.year.? % 400 == 0
-        )
-    );
+    return (self.year.? % 4 == 0 and (self.year.? % 100 != 0 or self.year.? % 400 == 0));
 }
 
 /// Returns a string representation of the date.
 ///
 /// A formatter error of any kind may be produced if the date itself has been improperly passed.
-pub fn toString(
-    self: *Date,
-    format: Format
-) ![]const u8 {
-    const fmt_style = switch(format) {
-        .@"MM-DD-YYYY" => .{self.month.?, self.day.?, self.year.?},
-        .@"DD-MM-YYYY" => .{self.day.?, self.month.?, self.year.?},
-        .@"YYYY-MM-DD" => .{self.year.?, self.month.?, self.day.?}
+pub fn toString(self: *Date, format: Format) ![]const u8 {
+    const fmt_style = switch (format) {
+        .@"MM-DD-YYYY" => .{ self.month.?, self.day.?, self.year.? },
+        .@"DD-MM-YYYY" => .{ self.day.?, self.month.?, self.year.? },
+        .@"YYYY-MM-DD" => .{ self.year.?, self.month.?, self.day.? },
     };
 
     var fmt_string: []u8 = undefined;
@@ -281,15 +237,7 @@ pub fn toString(
 }
 
 /// Returns a date from a string.
-pub fn fromString(
-    /// The current string format of the date.
-    date: []const u8,
-    /// The format of the date.
-    ///
-    /// This is necessary to help figure out how to properly extract the year, month
-    /// and day of the date.
-    format: Format
-) !Date {
+pub fn fromString(date: []const u8, format: Format) !Date {
     var values = mem.split(u8, date, "-");
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     var num_array = std.ArrayList([]const u8).init(gpa.allocator());
@@ -305,22 +253,10 @@ pub fn fromString(
         try num_array.append(value);
     }
 
-    return switch(format) {
-        .@"MM-DD-YYYY" => Date.init(
-            try fmt.parseInt(u64, num_array.items[2], 0),
-            try fmt.parseInt(u8, num_array.items[1], 0),
-            try fmt.parseInt(u8, num_array.items[0], 0)
-        ),
-        .@"DD-MM-YYYY" => Date.init(
-            try fmt.parseInt(u64, num_array.items[1], 0),
-            try fmt.parseInt(u8, num_array.items[2], 0),
-            try fmt.parseInt(u8, num_array.items[0], 0)
-        ),
-        .@"YYYY-MM-DD" => Date.init(
-            try fmt.parseInt(u64, num_array.items[0], 0),
-            try fmt.parseInt(u8, num_array.items[2], 0),
-            try fmt.parseInt(u8, num_array.items[1], 0)
-        )
+    return switch (format) {
+        .@"MM-DD-YYYY" => Date.init(try fmt.parseInt(u64, num_array.items[2], 0), try fmt.parseInt(u8, num_array.items[1], 0), try fmt.parseInt(u8, num_array.items[0], 0)),
+        .@"DD-MM-YYYY" => Date.init(try fmt.parseInt(u64, num_array.items[1], 0), try fmt.parseInt(u8, num_array.items[2], 0), try fmt.parseInt(u8, num_array.items[0], 0)),
+        .@"YYYY-MM-DD" => Date.init(try fmt.parseInt(u64, num_array.items[0], 0), try fmt.parseInt(u8, num_array.items[2], 0), try fmt.parseInt(u8, num_array.items[1], 0)),
     };
 }
 
@@ -333,7 +269,7 @@ test "Create date" {
     try testing.expect(date.month.? == 7);
     try testing.expect(date.day.? == 23);
 
-    log.debug("Y {?} M {?} D {?}\n", .{date.year, date.month, date.day});
+    log.debug("Y {?} M {?} D {?}\n", .{ date.year, date.month, date.day });
 }
 
 test "Create current date" {
@@ -343,46 +279,31 @@ test "Create current date" {
     try testing.expect(date.month != undefined);
     try testing.expect(date.day != undefined);
 
-    log.debug("Current Y {?} M {?} D {?}\n", .{date.year, date.month, date.day});
+    log.debug("Current Y {?} M {?} D {?}\n", .{ date.year, date.month, date.day });
 }
 
 // FIXME: This panics into an integer overflow. Not good! Isolate and do verbose debug check.
-// test "Compare dates" {
-//     var date = Date.init(2002, 7, 23);
-//     var date_now = try Date.now();
-//     var relative_date = try date.from(date_now);
-//
-//     try testing.expect(date_now.year != relative_date.?.year);
-//     try testing.expect(date_now.month != relative_date.?.month);
-//     try testing.expect(date_now.day != relative_date.?.day);
-//
-//     log.debug(
-//         "\nOrigin Y {?} M {?} D {?}\nNow Y {?} M {?} D {?}\nDifference Y {?} M {?} D {?}\n",
-//         .{
-//             date.year,
-//             date.month,
-//             date.day,
-//
-//             date_now.year,
-//             date_now.month,
-//             date_now.day,
-//
-//             relative_date.?.year,
-//             relative_date.?.month,
-//             relative_date.?.day
-//         }
-//     );
-// }
+test "Compare dates" {
+    var date = Date.init(2002, 7, 23);
+    var date_now = try Date.now();
+    var relative_date = try date.from(date_now);
+
+    try testing.expect(date_now.year != relative_date.?.year);
+    try testing.expect(date_now.month != relative_date.?.month);
+    try testing.expect(date_now.day != relative_date.?.day);
+
+    log.debug("\nOrigin Y {?} M {?} D {?}\nNow Y {?} M {?} D {?}\nDifference Y {?} M {?} D {?}\n", .{ date.year, date.month, date.day, date_now.year, date_now.month, date_now.day, relative_date.?.year, relative_date.?.month, relative_date.?.day });
+}
 
 // TODO: fix an annoying u64 -> i64 bug for current_month
-// test "Get weekday" {
-//     var date = Date.init(2002, 7, 23);
-//     var date_weekday = try date.weekday();
-//
-//     try testing.expect(date_weekday == Weekday.Tuesday);
-//
-//     log.debug("Weekday is {?}\n", .{date_weekday});
-// }
+test "Get weekday" {
+    var date = Date.init(2002, 7, 23);
+    var date_weekday = try date.weekday();
+
+    try testing.expect(date_weekday == Weekday.Tuesday);
+
+    log.debug("Weekday is {?}\n", .{date_weekday});
+}
 
 test "Check leap year" {
     var date = Date.init(2024, 1, 1);
@@ -394,27 +315,22 @@ test "Check leap year" {
 }
 
 // FIXME: I'm segfaulting because std.fmt is broken. Fix when stdlib is corrected!
-// test "Date to string" {
-//     var date = Date.init(2002, 7, 23);
-//     var date_as_string = try date.toString(.@"YYYY-MM-DD");
-//
-//     try testing.expect(mem.eql(u8, date_as_string, "2002-07-23"));
-//
-//     log.debug("{any}?\n", .{date_as_string});
-// }
+test "Date to string" {
+    var date = Date.init(2002, 7, 23);
+    var date_as_string = try date.toString(.@"YYYY-MM-DD");
 
-// test "String to date" {
-//     const string_as_date = try Date.fromString("2002-07-23", .@"YYYY-MM-DD");
-//     const pseudo_date = Date.init(2002, 7, 23);
-//
-//     try testing.expect(string_as_date.year == pseudo_date.year);
-//     try testing.expect(string_as_date.month == pseudo_date.month);
-//     try testing.expect(string_as_date.day == pseudo_date.day);
-//
-//     log.debug("{?} -> Y {?} M {?} D {?}\n", .{
-//         string_as_date,
-//         string_as_date.year,
-//         string_as_date.month,
-//         string_as_date.day
-//     });
-// }
+    try testing.expect(mem.eql(u8, date_as_string, "2002-07-23"));
+
+    log.debug("{any}?\n", .{date_as_string});
+}
+
+test "String to date" {
+    const string_as_date = try Date.fromString("2002-07-23", .@"YYYY-MM-DD");
+    const pseudo_date = Date.init(2002, 7, 23);
+
+    try testing.expect(string_as_date.year == pseudo_date.year);
+    try testing.expect(string_as_date.month == pseudo_date.month);
+    try testing.expect(string_as_date.day == pseudo_date.day);
+
+    log.debug("{?} -> Y {?} M {?} D {?}\n", .{ string_as_date, string_as_date.year, string_as_date.month, string_as_date.day });
+}

@@ -20,14 +20,7 @@ const FieldMetadata = struct {
 /// type. Because of this, we have to resort to defining things such as the type we want, and
 /// additional metadata unique to the field.
 ///
-pub fn Field(
-    /// The type that the field is supplied with.
-    /// Fields will extract the type information provided, including optionality.
-    comptime T: type,
-
-    /// Additional metadata to be applied onto the field.
-    comptime data: ?FieldMetadata
-) type {
+pub fn Field(comptime T: type, comptime data: ?FieldMetadata) type {
     return struct {
         /// The field type. Use @TypeOf() builtin for the child type of the field.
         f_type: T = T,

@@ -9,16 +9,7 @@ const Field = @import("Field.zig").Field;
 ///
 /// A Model type is returned which acts as an abstraction layer between the anonymous struct
 /// literal and the implicitly added identifiers.
-pub fn Object(
-    /// An anonymous struct literal with fields you wish the object to have.
-    /// Items must use Field in order to be validated properly:
-    ///
-    /// .{
-    ///     Field(?[]u8, .{ .desc = "Something for foo", .default = 'hello' }),
-    ///     Field(usize, .{})
-    /// }
-    comptime T: type
-) type {
+pub fn Object(comptime T: type) type {
     return struct {
         const Model = @This();
 
@@ -35,14 +26,9 @@ pub fn Object(
         }
 
         /// Gets data on a field from the object.
-        pub fn get(
-            self: *Model,
-            /// The field to get.
-            field_name: []const u8
-        ) ?Field {
+        pub fn get(self: *Model, field_name: []const u8) ?Field {
             for (self.fields) |field| {
-                if (field.name == field_name)
-                    return field;
+                if (field.name == field_name) return field;
             }
         }
     }{};

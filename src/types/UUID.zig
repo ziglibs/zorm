@@ -54,9 +54,9 @@ pub fn toString(self: *UUID) []const u8 {
     buffer[23] = '-';
 
     // Iterate through all stored indices known and bitshift to a random cryptographic value
-    for (encoded) |index, val| {
-      buffer[index + 0] = hex_set[self.octets[val] >> 4];
-      buffer[index + 1] = hex_set[self.octets[val] & 0x0f];
+    for (encoded, 0..) |index, val| {
+        buffer[index + 0] = hex_set[self.octets[val] >> 4];
+        buffer[index + 1] = hex_set[self.octets[val] & 0x0f];
     }
 
     return @as([]const u8, &buffer);
@@ -75,5 +75,5 @@ test "Check UUID string" {
 
     try testing.expect(uuid_string.len == 36);
 
-    log.debug("{s}, {}/36\n", .{uuid_string, uuid_string.len});
+    log.debug("{s}, {}/36\n", .{ uuid_string, uuid_string.len });
 }
