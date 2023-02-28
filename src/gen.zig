@@ -28,6 +28,8 @@ pub fn create(object: Object, comptime payload: Payload) error {Abnormal}!Object
             });
             return parsed;
         },
-        .Struct => return Object(payload);
+        .Struct => {
+            return Object(payload);
+        }
     }
 }
